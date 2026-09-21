@@ -18,7 +18,7 @@ app.route('/agents/sales', createAgentRouter(Sales));
 const WIDGET_ORIGINS = [
 	'http://localhost:5173',
 	'http://localhost:3000',
-	// 'https://your-portfolio.vercel.app',
+	'https://portfolio-razparkr-gmailcoms-projects.vercel.app',
 ];
 app.use(
 	'/agents/guide/*',
