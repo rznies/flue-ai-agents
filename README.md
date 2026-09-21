@@ -1,4 +1,6 @@
-# support-agent
+# flue-ai-agents
+
+Live: **https://support-agent.razparkr.workers.dev** · Repo: **https://github.com/rznies/flue-ai-agents**
 
 A [Flue](https://flueframework.com) portfolio project: **two production-style AI agents** behind one Cloudflare Worker —
 a sales assistant with real business tools, and an embeddable portfolio guide.
