@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pulseboard — Talk to Pulse, our AI sales agent</title>
+<style>
+  :root { --ink: #1a1a2e; --muted: #6b7280; --line: #e5e7eb; --accent: #4f46e5; --bg: #f8fafc; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+  header h1 { font-size: 28px; margin: 0 0 8px; }
+  header p { color: var(--muted); margin: 0 0 6px; line-height: 1.5; }
+  header code, .how code { background: #eef2ff; color: var(--accent); padding: 1px 6px; border-radius: 6px; font-size: 13px; }
+  .how { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 18px 0; font-size: 14px; line-height: 1.6; }
+  .how b { display: block; margin-bottom: 4px; }
+  #chat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-height: 320px; max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; line-height: 1.5; font-size: 15px; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.assistant { align-self: flex-start; background: #f1f5f9; border-bottom-left-radius: 4px; }
+  .msg.typing { color: var(--muted); font-style: italic; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+  .chips button { border: 1px solid var(--accent); color: var(--accent); background: #fff; border-radius: 999px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  .chips button:hover { background: #eef2ff; }
+  form { display: flex; gap: 8px; margin-top: 4px; }
+  form input { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+  form button, #newChat { border: none; background: var(--accent); color: #fff; border-radius: 10px; padding: 0 20px; font-size: 15px; cursor: pointer; }
+  form button:disabled { opacity: 0.6; cursor: progress; }
+  #newChat { background: #fff; color: var(--muted); border: 1px solid var(--line); padding: 8px 14px; font-size: 13px; margin-top: 12px; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 18px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Pulseboard — talk to Pulse 📈</h1>
+    <p>Pulse is a production-style <b>AI sales agent</b>: it qualifies leads, answers pricing from live business data,
+    shares customer results, and books discovery calls. This page and the agent API are served by <b>one Cloudflare Worker</b>.</p>
+  </header>
+
+  <div class="how">
+    <b>Try the full sales flow 👇</b>
+    1. Ask about pricing &nbsp;2. Ask for proof &nbsp;3. Book a call — then ask <i>"what did I book?"</i> in a later message.<br />
+    Reload the page: the same conversation id (<code id="cid"></code>) resumes with full history. That is durable execution.
+  </div>
+
+  <div id="chat" aria-live="polite"></div>
+
+  <div class="chips">
+    <button data-q="How much does the Studio plan cost, and what do I get?">💰 Studio pricing?</button>
+    <button data-q="Do you have results from businesses like mine? I'm a freelancer.">⭐ Customer proof?</button>
+    <button data-q="I'd like to book a discovery call">📅 Book a call</button>
+  </div>
+
+  <form id="form">
+    <input id="input" type="text" placeholder="Ask Pulse anything…" autocomplete="off" />
+    <button id="send" type="submit">Send</button>
+  </form>
+  <button id="newChat" type="button">Start a new conversation</button>
+
+  <footer>
+    Built with <code>Flue</code>: agent <code>Sales</code> + tools <code>get_pricing</code>, <code>get_case_studies</code>,
+    <code>book_meeting</code> (durable state). API: <code>POST /agents/sales/:id</code> per message,
+    <code>GET /agents/sales/:id</code> for history.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var AGENT = '/agents/sales';
+  var id = localStorage.getItem('pulse-conversation') || ('demo-' + Math.random().toString(36).slice(2, 8));
+  localStorage.setItem('pulse-conversation', id);
+  document.getElementById('cid').textContent = id;
+
+  var chat = document.getElementById('chat');
+  var form = document.getElementById('form');
+  var input = document.getElementById('input');
+  var send = document.getElementById('send');
+  var renderedCount = 0;
+  var polling = false;
+
+  function textOf(msg) {
+    if (typeof msg.body === 'string') return msg.body;
+    var parts = msg.parts || [];
+    return parts.filter(function (p) { return p && (p.type === 'text'); })
+      .map(function (p) { return p.text || ''; }).join('');
+  }
+
+  function render(snapshot) {
+    var messages = (snapshot && snapshot.messages) || [];
+    chat.innerHTML = '';
+    messages.forEach(function (m) {
+      if (m.role !== 'user' && m.role !== 'assistant') return;
+      var t = textOf(m);
+      if (!t) return;
+      var div = document.createElement('div');
+      div.className = 'msg ' + m.role;
+      div.textContent = t;
+      chat.appendChild(div);
+    });
+    renderedCount = messages.length;
+    chat.scrollTop = chat.scrollHeight;
+    return messages;
+  }
+
+  function showTyping() {
+    var div = document.createElement('div');
+    div.className = 'msg assistant typing';
+    div.id = 'typing';
+    div.textContent = 'Pulse is thinking…';
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function hideTyping() {
+    var t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  function load() {
+    return fetch(AGENT + '/' + encodeURIComponent(id))
+      .then(function (r) { return r.ok ? r.json() : { messages: [] }; })
+      .then(function (snap) { hideTyping(); render(snap); })
+      .catch(function () {});
+  }
+
+  function pollFor(submissionId, tries) {
+    if (tries <= 0) { hideTyping(); load(); return; }
+    fetch(AGENT + '/' + encodeURIComponent(id))
+      .then(function (r) { return r.json(); })
+      .then(function (snap) {
+        render(snap);
+        var done = ((snap.settlements || []).some(function (s) {
+          return s && (s.submissionId === submissionId);
+        }));
+        if (done) { hideTyping(); load(); }
+        else setTimeout(function () { pollFor(submissionId, tries - 1); }, 1500);
+      })
+      .catch(function () { setTimeout(function () { pollFor(submissionId, tries - 1); }, 1500); });
+  }
+
+  function ask(q) {
+    if (!q || polling) return;
+    polling = true;
+    send.disabled = true;
+    fetch(AGENT + '/' + encodeURIComponent(id), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: 'user', body: q })
+    }).then(function (r) { return r.json(); }).then(function (admission) {
+      showTyping();
+      render({ messages: (admission && admission.snapshot && admission.snapshot.messages) || [] });
+      pollFor(admission && admission.submissionId, 40);
+    }).catch(function () {
+      hideTyping();
+    }).finally(function () {
+      polling = false;
+      send.disabled = false;
+    });
+    input.value = '';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    ask(input.value.trim());
+  });
+  document.querySelectorAll('.chips button').forEach(function (b) {
+    b.addEventListener('click', function () { ask(b.getAttribute('data-q')); });
+  });
+  document.getElementById('newChat').addEventListener('click', function () {
+    id = 'demo-' + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem('pulse-conversation', id);
+    document.getElementById('cid').textContent = id;
+    renderedCount = 0;
+    load();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
