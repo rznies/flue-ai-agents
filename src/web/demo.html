@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pulseboard Agents — Durable AI agents on Cloudflare Workers</title>
-<meta name="description" content="Two production-style AI agents behind one Cloudflare Worker: a sales assistant with business tools and durable bookings, plus an embeddable portfolio guide. Built with Flue." />
+<title>Pulseboard Agents — AI helpers that answer, book, and remember</title>
+<meta name="description" content="Two live AI helpers: Pulse answers sales questions and books calls, Guide answers questions about Raz. Try them right on this page." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
@@ -126,14 +126,12 @@
   <div class="wrap">
     <a class="wordmark" href="#top">pulseboard<span>&nbsp;agents</span></a>
     <div class="nav-links">
-      <a href="#agents">Agents</a>
-      <a href="#how">How it works</a>
-      <a href="#demo">Live demo</a>
-      <a href="#api">API</a>
+      <a href="#agents">Helpers</a>
+      <a href="#demo">Try it</a>
       <a href="#embed">Embed</a>
     </div>
     <div class="nav-right">
-      <span class="status-dot"><i></i>worker&nbsp;live</span>
+      <span class="status-dot"><i></i>live</span>
       <a class="btn btn-secondary" href="https://github.com/rznies/flue-ai-agents" target="_blank" rel="noopener">GitHub</a>
       <a class="btn btn-primary" href="#demo">Try live</a>
     </div>
@@ -142,40 +140,40 @@
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="badge-pill">Flue · Cloudflare Workers · Durable Objects</span>
-    <h1>Durable AI agents,<br />one Worker deep.</h1>
-    <p class="sub">Two production-style agents behind a single Cloudflare Worker: a sales assistant that calls business tools and remembers bookings, and a portfolio guide you can embed anywhere with one script tag.</p>
+    <span class="badge-pill">Two AI helpers · live now</span>
+    <h1>Helpers that answer,<br />book, and remember.</h1>
+    <p class="sub">Pulse answers sales questions and books calls. Guide answers questions about Raz and his work. Both are live below — talk to them.</p>
     <div class="hero-ctas">
       <a class="btn btn-primary" href="#demo">Talk to Pulse</a>
       <a class="btn btn-outline" href="https://github.com/rznies/flue-ai-agents" target="_blank" rel="noopener">Read the code</a>
     </div>
 
     <div class="term-grid">
-      <div class="term-pane"><div class="cap">01 · send</div><span class="c">$</span> curl -X POST <span class="k">/agents/sales/ticket-8472</span> \<br />&nbsp;&nbsp;-H <span class="s">'content-type: application/json'</span> \<br />&nbsp;&nbsp;-d <span class="s">'{"kind":"user","body":"Studio pricing?"}'</span><br /><br /><span class="c"># → 202 admitted, durable receipt</span><br />{ <span class="k">"submissionId"</span>: <span class="s">"sub_01M…"</span> }</div>
-      <div class="term-pane"><div class="cap">02 · tools fire</div><span class="c">▚ tool</span> <span class="b">get_pricing</span><br /><span class="c">▚ tool done</span> <span class="b">get_pricing</span> <span class="s">42ms</span><br /><br /><span class="b">assistant</span><br />Studio is <span class="s">$49/mo</span> — 15 sites,<br />100k pageviews, white-label reports…</div>
-      <div class="term-pane"><div class="cap">03 · state persists</div><span class="c">▚ tool</span> <span class="b">book_meeting</span><br />ref <span class="s">PB-MU9V8N2Z</span> · wed 10:00 UTC<br />→ committed to the instance log<br /><br /><span class="c"># crash here? resumes mid-turn.</span></div>
-      <div class="term-pane"><div class="cap">04 · embed anywhere</div><span class="k">&lt;script</span> src=<span class="s">"…workers.dev/embed.js"</span><br />&nbsp;&nbsp;data-title=<span class="s">"Ask about Raz"</span><span class="k">&gt;&lt;/script&gt;</span><br /><br /><span class="c"># per-visitor durable conversations</span></div>
+      <div class="term-pane"><div class="cap">01 · you ask</div><span class="c">$</span> “How much is Studio?”<br /><br />Pulse replies <span class="s">$49/mo</span>, with<br />what's included.</div>
+      <div class="term-pane"><div class="cap">02 · it checks real info</div>Pulse looks up the <span class="b">price list</span><br />before answering.<br /><br /><span class="c"># never makes prices up</span></div>
+      <div class="term-pane"><div class="cap">03 · it books + remembers</div>Booking confirmed:<br />ref <span class="s">PB-MU9V8N2Z</span> · wed 10:00<br /><br />Ask later <span class="b">“what did I book?”</span> —<br />it remembers.</div>
+      <div class="term-pane"><div class="cap">04 · use it on your site</div><span class="k">&lt;script</span> src=<span class="s">"…/embed.js"</span><span class="k">&gt;&lt;/script&gt;</span><br /><br /><span class="c"># one tag, done</span></div>
     </div>
   </div>
 </header>
 
 <section class="band" id="agents">
   <div class="wrap">
-    <div class="label">The agents</div>
-    <h2 class="sec">Two agents. One route map.</h2>
-    <p class="lead">Every agent is a TypeScript function. Every route is mounted explicitly in <code>src/app.ts</code>. No hidden wiring.</p>
+    <div class="label">The helpers</div>
+    <h2 class="sec">Meet Pulse and Guide.</h2>
+    <p class="lead">Two helpers, each good at one job.</p>
     <div class="grid2">
       <div class="toolkit-card">
         <div class="icon">📈</div>
-        <h3>Pulse — sales assistant</h3>
-        <p>Qualifies leads, answers pricing from live business data, shares customer proof, and books discovery calls into durable per-conversation state.</p>
-        <p style="margin-top:12px"><code>POST /agents/sales/:id</code></p>
+        <h3>Pulse — answers and books</h3>
+        <p>Ask about plans and prices, see real customer results, and book a call. It remembers your booking.</p>
+        <p style="margin-top:12px"><code>Talk below ↓</code></p>
       </div>
       <div class="toolkit-card">
         <div class="icon">💬</div>
-        <h3>Guide — portfolio assistant</h3>
-        <p>Answers questions about Raz and 21 shipped sites through a grounded <code>list_projects</code> tool — links it returns are always real.</p>
-        <p style="margin-top:12px"><code>POST /agents/guide/:id</code></p>
+        <h3>Guide — knows Raz's work</h3>
+        <p>Ask about Raz, his services, and his 21 sites. Every link it shares is real.</p>
+        <p style="margin-top:12px"><code>Lives on the portfolio ↓</code></p>
       </div>
     </div>
   </div>
@@ -183,22 +181,22 @@
 
 <section class="band" id="how" style="padding-top:0">
   <div class="wrap">
-    <div class="label">Under the hood</div>
-    <h2 class="sec">Built like infrastructure.</h2>
-    <p class="lead">The patterns that make this production-grade rather than a chatbot demo.</p>
+    <div class="label">Why it works</div>
+    <h2 class="sec">No guessing. No forgetting.</h2>
+    <p class="lead">Three simple ideas do all the heavy lifting.</p>
     <div class="grid3">
-      <div class="feature-card"><div class="icon">🔧</div><h3>Tools, not prompts</h3><p>Pricing, case studies, bookings, and project listings are <code>defineTool</code> functions with valibot schemas — validated inputs, typed outputs, narration to the model.</p></div>
-      <div class="feature-card"><div class="icon">💾</div><h3>Durable state</h3><p>Bookings persist via <code>usePersistentState</code> on the instance record log. Reload, restart, redeploy — the conversation resumes with memory intact.</p></div>
-      <div class="feature-card"><div class="icon">🌐</div><h3>HTTP-native</h3><p>One POST per message returns <code>202</code> on admission; <code>GET</code> reads history, settlements track delivery outcomes. CORS-allowlisted for embeds.</p></div>
+      <div class="feature-card"><div class="icon">🔧</div><h3>Real answers</h3><p>Before replying, each helper checks its own price lists, stories, or project links. It never makes things up.</p></div>
+      <div class="feature-card"><div class="icon">💾</div><h3>It remembers</h3><p>Bookings and chat history survive reloads and restarts. Come back tomorrow — it still knows.</p></div>
+      <div class="feature-card"><div class="icon">🌐</div><h3>Lives anywhere</h3><p>One small script tag puts a helper on any website. Plain web requests underneath — nothing to install.</p></div>
     </div>
   </div>
 </section>
 
 <section class="band" id="demo" style="padding-top:0">
   <div class="wrap">
-    <div class="label">Live demo</div>
+    <div class="label">Try it</div>
     <h2 class="sec">Talk to Pulse, right here.</h2>
-    <p class="lead">This chat hits the Worker you're reading this on — same origin, no mocks. Try: pricing → proof → book a call → <i>"what did I book?"</i>. Reload: same id, full history.</p>
+    <p class="lead">Live, not a mock. Ask about pricing, ask for proof, book a call — then ask <i>"what did I book?"</i>. Reload the page: it remembers.</p>
     <div class="demo-shell">
       <div id="chat" aria-live="polite"></div>
       <div class="chips">
@@ -217,24 +215,24 @@
 
 <section class="band" id="api" style="padding-top:0">
   <div class="wrap">
-    <div class="label">API</div>
-    <h2 class="sec">One POST per message.</h2>
-    <p class="lead">Fire-and-forget delivery with durable receipts. Poll history or stream updates; settlements tell you exactly when your delivery is answered.</p>
-    <div class="code-block"><span class="c"># send — 202 on admission</span>
-curl -X POST https://support-agent.razparkr.workers.dev/agents/sales/ticket-8472 \
+    <div class="label">For builders</div>
+    <h2 class="sec">Simple behind the scenes too.</h2>
+    <p class="lead">Send a message, read the reply. That's the whole API.</p>
+    <div class="code-block"><span class="c"># ask something</span>
+curl -X POST https://support-agent.razparkr.workers.dev/agents/sales/my-chat \
   -H <span class="s">'content-type: application/json'</span> \
   -d <span class="s">'{"kind":"user","body":"Studio pricing?"}'</span>
 
-<span class="c"># read — materialized snapshot, render-ready parts</span>
-curl https://support-agent.razparkr.workers.dev/agents/sales/ticket-8472?view=history</div>
+<span class="c"># read the reply</span>
+curl https://support-agent.razparkr.workers.dev/agents/sales/my-chat</div>
   </div>
 </section>
 
 <section class="band" id="embed" style="padding-top:0">
   <div class="wrap">
     <div class="label">Embed</div>
-    <h2 class="sec">Drop the Guide on any site.</h2>
-    <p class="lead">The Guide agent ships as a dependency-free widget. One tag, per-visitor durable conversations via <code>localStorage</code> ids — it's live on the portfolio right now.</p>
+    <h2 class="sec">Put Guide on any website.</h2>
+    <p class="lead">One tag. It already answers questions on Raz's portfolio.</p>
     <div class="code-block"><span class="k">&lt;script</span> src=<span class="s">"https://support-agent.razparkr.workers.dev/embed.js"</span>
   data-title=<span class="s">"Ask about Raz"</span><span class="k">&gt;&lt;/script&gt;</span></div>
   </div>
@@ -242,8 +240,8 @@ curl https://support-agent.razparkr.workers.dev/agents/sales/ticket-8472?view=hi
 
 <section class="cta-band">
   <div class="wrap">
-    <h2>Hire the human behind the agents.</h2>
-    <p>Raz ships sites and the AI that sells them. Replies within 2 days with a sketch-level plan and a fixed quote.</p>
+    <h2>Like what they can do? Hire the human.</h2>
+    <p>Raz replies in 2 days with a plan and a fixed price.</p>
     <a class="btn btn-primary" href="mailto:hello@raz.build">hello@raz.build</a>
   </div>
 </section>
@@ -253,18 +251,17 @@ curl https://support-agent.razparkr.workers.dev/agents/sales/ticket-8472?view=hi
     <div class="foot-grid">
       <div>
         <h4>pulseboard agents</h4>
-        <a href="https://github.com/rznies/flue-ai-agents" target="_blank" rel="noopener">Source code</a>
-        <a href="https://flueframework.com/docs/" target="_blank" rel="noopener">Flue docs</a>
+        <a href="https://github.com/rznies/flue-ai-agents" target="_blank" rel="noopener">How it's built</a>
       </div>
       <div>
-        <h4>Agents</h4>
-        <a href="#demo">Pulse — sales</a>
-        <a href="#embed">Guide — portfolio</a>
+        <h4>Helpers</h4>
+        <a href="#demo">Pulse — answers + books</a>
+        <a href="#embed">Guide — knows Raz's work</a>
       </div>
       <div>
-        <h4>Endpoints</h4>
-        <a href="/health">/health</a>
-        <a href="/embed.js">/embed.js</a>
+        <h4>Technical</h4>
+        <a href="/health">Status</a>
+        <a href="/embed.js">Widget code</a>
       </div>
       <div>
         <h4>Human</h4>
@@ -272,7 +269,7 @@ curl https://support-agent.razparkr.workers.dev/agents/sales/ticket-8472?view=hi
         <a href="mailto:hello@raz.build">hello@raz.build</a>
       </div>
     </div>
-    <p class="foot-note">Pulseboard is a fictional demo SaaS. Agents run on Cloudflare Workers via Flue + Durable Objects.</p>
+    <p class="foot-note">Pulseboard is a made-up demo shop. The helpers are real and run on Cloudflare.</p>
   </div>
 </footer>
 
